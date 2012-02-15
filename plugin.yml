@@ -1,0 +1,9 @@
+name: DonationManager
+main: com.github.grickit.DonationManager
+version: 0.0.1
+commands:
+  dmset:
+    description: Adds or updates a donator
+    usage: /dmset [player] [lifetime donation total]
+    permission: DonationManager.dmset
+    permission-message: You don't have permission for this command.

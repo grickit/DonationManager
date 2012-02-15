@@ -1,0 +1,6 @@
+multiplier: 100
+thanks_messages:
+- Thank you for donating! Here is your reward for today.
+- (use /money to see your new balance)
+donators:
+  Grickit: 1
