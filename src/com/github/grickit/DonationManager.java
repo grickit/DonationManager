@@ -93,6 +93,19 @@ public class DonationManager extends JavaPlugin {
       sender.sendMessage(args[0]+" has not donated.");
       return true;
     }
+
+    else if(cmd.getName().equalsIgnoreCase("dmlist")) { // dmlist command
+      sender.sendMessage("List of donators:");
+      String donator_list = "";
+      Object[] donators = getConfig().getConfigurationSection("donators").getKeys(false).toArray();
+      for(Object donator_name: donators) {
+	donator_list = donator_list + donator_name + ", ";
+      }
+      donator_list = donator_list.substring(0, donator_list.length() - 2);
+      sender.sendMessage(donator_list);
+      return true;
+    }
+
     return false;
   }
 

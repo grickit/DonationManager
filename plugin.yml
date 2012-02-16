@@ -1,6 +1,6 @@
 name: DonationManager
 main: com.github.grickit.DonationManager
-version: 0.0.1
+version: 0.0.2
 commands:
   dmset:
     description: Adds or updates a donator
