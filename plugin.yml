@@ -7,3 +7,20 @@ commands:
     usage: /dmset [player] [lifetime donation total]
     permission: DonationManager.dmset
     permission-message: You don't have permission for this command.
+  dmsee:
+    description: Shows how much a player has donated
+    usage: /dmsee [player]
+    permission: DonationManager.dmsee
+    permission-message: You don't have permission for this command.
+  dmlist:
+    description: Shows a list of donators
+    usage: /dmlist
+    permission: DonationManager.dmlist
+    permission-message: You don't have permission for this command.
+
+permissions:
+  DonationManager.dmsee:
+    description: Shows how much a player has donated
+    default: true
+  DonationManager.dmlist:
+    description: Shows a list of donators

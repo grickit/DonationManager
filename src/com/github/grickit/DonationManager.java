@@ -14,7 +14,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-
 public class DonationManager extends JavaPlugin {
   public final JoinListener join_listener = new JoinListener(); // Defined later; Listens for people logging into the server.
   public Logger log = Logger.getLogger("Minecraft"); //Used to send messages to console.
@@ -50,21 +49,48 @@ public class DonationManager extends JavaPlugin {
 
 
   public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) { // Run every time the player enters a command.
-    if (cmd.getName().equalsIgnoreCase("dmset")) { // Our only command for now is /dmset
+    if (cmd.getName().equalsIgnoreCase("dmset")) { // dmset command
       if(args.length != 2) { // Did they enter an incorrect number of arguments?
 	sender.sendMessage(ChatColor.RED+"Incorrect number of arguments.");
+	return false;
       }
       else {
 	try { // Make sure the donation amount is a number.
 	  Integer amount = Integer.parseInt(args[1]);
-	  getConfig().set("donators."+args[0], amount);
+	  if(amount == 0) { // Erase $0 donators
+	    getConfig().set("donators."+args[0],null);
+	  }
+	  else { // Record the new amount
+	    getConfig().set("donators."+args[0], amount);
+	  }
 	  saveConfig();
 	  sender.sendMessage(ChatColor.GREEN+"Donator added or updated.");
 	}
 	catch (NumberFormatException e) {
 	  sender.sendMessage(ChatColor.RED+"Donation amount must be a number.");
 	}
+	return true;
       }
+    }
+
+    else if(cmd.getName().equalsIgnoreCase("dmsee")) { // dmsee command
+      if(args.length != 1) { // Did they enter an incorrect number of arguments?
+	sender.sendMessage(ChatColor.RED+"Incorrect number of arguments.");
+	return false;
+      }
+      else {
+	try {
+	  Integer amount = Integer.parseInt(getConfig().getString("donators."+args[0]));
+	  if(amount != null && amount != 0) {
+	    String donation_prefix = getConfig().getString("donation_prefix");
+	    String donation_suffix = getConfig().getString("donation_suffix");
+	    sender.sendMessage(args[0]+" has donated "+donation_prefix+amount+donation_suffix);
+	    return true;
+	  }
+	}
+	catch (NumberFormatException e) { }
+      }
+      sender.sendMessage(args[0]+" has not donated.");
       return true;
     }
     return false;
