@@ -1,8 +1,13 @@
 multiplier: 100
+days_to_expire: 120
+donation_prefix: '$'
+donation_suffix: ''
 thanks_messages:
 - Thank you for donating! Here is your reward for today.
 - (use /money to see your new balance)
-donation_prefix: '$'
-donation_suffix: ''
-donators:
-  Grickit: 1
+current_donations:
+  Notch:
+    1: 0
+expired_donations:
+  Notch:
+    0: 0

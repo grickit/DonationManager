@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import net.milkbowl.vault.economy.Economy;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -48,21 +49,65 @@ public class DonationManager extends JavaPlugin {
   }
 
 
+  public Integer retotalDonator(String player) {
+    Long now = (System.currentTimeMillis() / 1000L);
+    Integer expire_time = getConfig().getInt("days_to_expire")*24*60*60;
+    Integer total_donations = 0;
+    Object[] current_donations;
+    try {
+      current_donations = getConfig().getConfigurationSection("current_donations."+player).getKeys(false).toArray();
+    }
+    catch (NullPointerException e) {
+      return 0;
+    }
+    if(current_donations == null || current_donations.length == 0) {
+      return 0;
+    }
+    else {
+      for(Object donation: current_donations) {
+
+	Integer donation_time;
+	try {
+	  donation_time = Integer.parseInt((String) donation);
+	}
+	catch(NumberFormatException e) {
+	  donation_time = 0;
+	}
+
+	Integer donation_amount = getConfig().getInt("current_donations."+player+"."+donation);
+	if(expire_time != 0 && (now - donation_time) > expire_time) {
+	  log.info(prefix+player+"'s donation of "+getConfig().getString("donation_prefix")+donation_amount+getConfig().getString("donation_suffix")+" from "+donation+" has expired.");
+	  try {
+	    Bukkit.getPlayer(player).sendMessage(ChatColor.RED+"Your "+getConfig().getString("donation_prefix")+donation_amount+getConfig().getString("donation_suffix")+" donation from "+donation_time+" has expired.");
+	  }
+	  catch (NullPointerException e) {
+	    log.info(prefix+player+" is not online to be notified.");
+	  }
+	  getConfig().set("current_donations."+player+"."+donation_time,null); // Erase the expired donation
+	  getConfig().set("expired_donations."+player+"."+donation_time,donation_amount); // Mark the donation as expired.
+	  saveConfig();
+	}
+	else {
+	  total_donations += donation_amount;
+	}
+      }
+    }
+    saveConfig();
+    return total_donations;
+  }
+
+
   public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) { // Run every time the player enters a command.
-    if (cmd.getName().equalsIgnoreCase("dmset")) { // dmset command
+    if (cmd.getName().equalsIgnoreCase("dmadd")) { // dmset command
       if(args.length != 2) { // Did they enter an incorrect number of arguments?
 	sender.sendMessage(ChatColor.RED+"Incorrect number of arguments.");
 	return false;
       }
       else {
+	Long now = (System.currentTimeMillis() / 1000L);
 	try { // Make sure the donation amount is a number.
 	  Integer amount = Integer.parseInt(args[1]);
-	  if(amount == 0) { // Erase $0 donators
-	    getConfig().set("donators."+args[0],null);
-	  }
-	  else { // Record the new amount
-	    getConfig().set("donators."+args[0], amount);
-	  }
+	  getConfig().set("current_donations."+args[0]+"."+now,amount);
 	  saveConfig();
 	  sender.sendMessage(ChatColor.GREEN+"Donator added or updated.");
 	}
@@ -80,17 +125,15 @@ public class DonationManager extends JavaPlugin {
       }
       else {
 	try {
-	  Integer amount = Integer.parseInt(getConfig().getString("donators."+args[0]));
+	  Integer amount = retotalDonator(args[0]);
 	  if(amount != null && amount != 0) {
-	    String donation_prefix = getConfig().getString("donation_prefix");
-	    String donation_suffix = getConfig().getString("donation_suffix");
-	    sender.sendMessage(args[0]+" has donated "+donation_prefix+amount+donation_suffix);
+	    sender.sendMessage(ChatColor.GREEN+args[0]+" has donated "+getConfig().getString("donation_prefix")+amount+getConfig().getString("donation_suffix"));
 	    return true;
 	  }
 	}
 	catch (NumberFormatException e) { }
       }
-      sender.sendMessage(args[0]+" has not donated.");
+      sender.sendMessage(ChatColor.RED+args[0]+" has not donated.");
       return true;
     }
 
@@ -119,7 +162,7 @@ public class DonationManager extends JavaPlugin {
       //We don't have to check if it has actually been a day since their last login. We just need to check if today is a different date.
       String date = calendar.get(Calendar.YEAR) + "-" + calendar.get(Calendar.MONTH) + "-" + calendar.get(Calendar.DATE);
       String name = event.getPlayer().getDisplayName();
-      Integer amount = getConfig().getInt("donators."+name);
+      Integer amount = retotalDonator(name);
       if(amount != null && amount != 0) { //Is this person a donator? If not, we don't care to waste any more time on them.
 	String last_login = getConfig().getString("login_dates."+name);
 	if(last_login == null || !last_login.equals(date)) { //Is today a different day than last time?
@@ -131,6 +174,7 @@ public class DonationManager extends JavaPlugin {
 	  for(Object message: thanks) {
 	    event.getPlayer().sendMessage(ChatColor.GREEN+message.toString());
 	  }
+	  //Give the money
 	  econ.bankDeposit(name,amount*getConfig().getInt("multiplier"));
 	}
       }

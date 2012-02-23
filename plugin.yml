@@ -1,26 +1,29 @@
 name: DonationManager
 main: com.github.grickit.DonationManager
-version: 0.0.2
+version: 0.0.3
 commands:
-  dmset:
-    description: Adds or updates a donator
-    usage: /dmset [player] [lifetime donation total]
-    permission: DonationManager.dmset
+  dmadd:
+    description: Creates a new donation that will expire.
+    usage: /dmadd [player] [donation amount]
+    permission: DonationManager.admin
     permission-message: You don't have permission for this command.
   dmsee:
-    description: Shows how much a player has donated
+    description: Shows how much a player has donated.
     usage: /dmsee [player]
     permission: DonationManager.dmsee
     permission-message: You don't have permission for this command.
   dmlist:
-    description: Shows a list of donators
+    description: Shows a list of donators.
     usage: /dmlist
     permission: DonationManager.dmlist
     permission-message: You don't have permission for this command.
 
 permissions:
+  DonationManager.admin:
+    description: Allows you to manage donations
   DonationManager.dmsee:
     description: Shows how much a player has donated
     default: true
   DonationManager.dmlist:
     description: Shows a list of donators
+    default: true
